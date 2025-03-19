@@ -6,21 +6,21 @@ import { ScrollTrigger } from "https://cdn.skypack.dev/gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 // Select the HTML elements needed for the animation
-const verticalSection = document.querySelector("#horizontal-section");
-const wrapper = verticalSection.querySelector(".wrapper");
+const horizontalSection = document.querySelector("#horizontal-section");
+const wrapper = horizontalSection.querySelector(".wrapper");
 const items = wrapper.querySelectorAll(".item");
 
 // Initial states
 items.forEach((item, index) => {
   if (index !== 0) {
-    gsap.set(item, { yPercent: 100 }); // Change xPercent to yPercent
+    gsap.set(item, { xPercent: 100 });
   }
 });
 
 function initScroll() {
   const tl = gsap.timeline({
     scrollTrigger: {
-      trigger: verticalSection,
+      trigger: horizontalSection,
       pin: true,
       start: "top top",
       end: () => `+=${items.length * 100}%`,
@@ -29,7 +29,6 @@ function initScroll() {
     },
     defaults: { ease: "none" },
   });
-
   items.forEach((item, index) => {
     if (index !== items.length - 1) {
       tl.to(item, {
@@ -38,7 +37,7 @@ function initScroll() {
       }).to(
         items[index + 1],
         {
-          yPercent: 0, // Change xPercent to yPercent
+          xPercent: 0,
         },
         "<"
       );
