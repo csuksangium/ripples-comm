@@ -1,23 +1,24 @@
 // fade-phase-13.js (ES module)
 
-// Prefer jsDelivr ESM paths (stable + fast)
 import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
-let tl; // keep a reference so we can kill on re-init
+let tl;
 
 export default function initScroll() {
-  // Respect reduced-motion
+  // Respect reduced motion
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const verticalSection = document.querySelector("#horizontal-section");
   if (!verticalSection) return;
 
   const wrapper = verticalSection.querySelector(".wrapper");
-  const items = wrapper ? wrapper.querySelectorAll(".item") : null;
-  if (!wrapper || !items || !items.length) return;
+  if (!wrapper) return;
+
+  const items = wrapper.querySelectorAll(".item");
+  if (!items.length) return;
 
   // Reset items
   items.forEach(item => gsap.set(item, { clearProps: "all" }));
@@ -27,12 +28,12 @@ export default function initScroll() {
     gsap.set(item, index === 0 ? { opacity: 1, yPercent: 0 } : { opacity: 0, yPercent: 100 });
   });
 
-  // Cleanup previous run
+  // Cleanup from prior runs
   if (tl) tl.kill();
   ScrollTrigger.getAll().forEach(st => st.kill());
 
   // Smoother pinning on mobile
-  const pinType = document.body.style.transform ? "transform" : "fixed";
+  const pinType = getComputedStyle(document.body).transform !== 'none' ? 'transform' : 'fixed';
 
   tl = gsap.timeline({
     scrollTrigger: {
@@ -48,18 +49,21 @@ export default function initScroll() {
     defaults: { ease: "power1.inOut" },
   });
 
+  // Dwell + transitions
   items.forEach((item, index) => {
     if (index !== items.length - 1) {
-      tl.to({}, { duration: 0.7 })
+      tl
+        .to({}, { duration: 0.7 })
         .to(item, { scale: 0.95, opacity: 0, duration: 0.8 })
         .to(items[index + 1], { yPercent: 0, opacity: 1, duration: 0.8 }, "<");
     } else {
-      tl.to({}, { duration: 1.5 })
+      tl
+        .to({}, { duration: 1.5 })
         .to(item, { scale: 0.95, opacity: 0, duration: 0.8 });
     }
   });
 
-  // If items contain <video>, set light defaults
+  // Light video defaults if items contain <video>
   items.forEach(item => {
     item.querySelectorAll("video").forEach(v => {
       v.setAttribute("playsinline", "");
@@ -68,7 +72,7 @@ export default function initScroll() {
     });
   });
 
-  // Final refresh pass
+  // Final refresh
   requestAnimationFrame(() => ScrollTrigger.refresh());
 
   return tl;
